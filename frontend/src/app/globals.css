@@ -1,0 +1,7 @@
+html { scroll-behavior: smooth; }
+body { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+.leaflet-container { font-family: inherit; }
+@media print {
+  header, footer, .no-print { display: none !important; }
+}

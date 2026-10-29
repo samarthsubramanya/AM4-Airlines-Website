@@ -1,0 +1,14 @@
+{
+  "deployment": {
+    "name": "auth_bridge",
+    "stack": "node20",
+    "type": "advancedio",
+    "env_variables": {
+      "AUTH_JWT_SECRET": "same value as the API's AUTH_JWT_SECRET",
+      "ALLOWED_ORIGINS": "https://your-site.vercel.app"
+    }
+  },
+  "execution": {
+    "main": "index.js"
+  }
+}

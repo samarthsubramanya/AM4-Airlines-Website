@@ -1,0 +1,21 @@
+# Render Blueprint for the Indian.com API (free web service).
+services:
+  - type: web
+    name: indian-com-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AUTH_JWT_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DEMO_AUTH
+        value: "true"

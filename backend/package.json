@@ -1,0 +1,25 @@
+{
+  "name": "indian-com-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Booking API for Indian.com — an AirlineManager 4 inspired airline",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.2",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.7.0",
+    "zod": "^4.6.7"
+  }
+}
