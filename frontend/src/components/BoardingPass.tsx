@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import { QRCodeSVG } from "qrcode.react";
 import { CABIN_LABEL, formatDate, formatTime } from "@/lib/format";
 import type { Airport, Booking, Leg, Passenger } from "@/lib/types";
-import { PeacockMark } from "./Logo";
+import { AIRLINE, AirlineMark } from "./Airline";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -27,7 +27,7 @@ export function BoardingPass({ booking, passenger, leg, seat, byCode }: { bookin
   if (!from || !to) return null;
   const name = `${passenger.lastName.toUpperCase()}/${passenger.firstName.toUpperCase()} ${passenger.title?.toUpperCase() ?? ""}`.trim();
   // Simplified IATA BCBP-style payload.
-  const qr = `M1${name.padEnd(20).slice(0, 20)}E${booking.pnr} ${leg.from}${leg.to}IN ${leg.flightNo.slice(2).padStart(4, "0")} ${leg.date} ${seat ?? "---"}`;
+  const qr = `M1${name.padEnd(20).slice(0, 20)}E${booking.pnr} ${leg.from}${leg.to}${leg.flightNo.slice(0, 2)} ${leg.flightNo.slice(3).padStart(4, "0")} ${leg.date} ${seat ?? "---"}`;
 
   return (
     <Paper
@@ -43,11 +43,14 @@ export function BoardingPass({ booking, passenger, leg, seat, byCode }: { bookin
         breakInside: "avoid",
       }}
     >
-      <Box sx={{ flex: 1, p: 3, color: "#fff", background: "linear-gradient(135deg, #06283D, #0A4D68 60%, #088395)" }}>
+      <Box sx={{ flex: 1, p: 3, color: "#fff", background: `linear-gradient(135deg, #06283D, ${AIRLINE[leg.operator].color} 60%, ${leg.operator === "IN" ? "#088395" : "#3b3f8f"})` }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <PeacockMark size={28} />
-            <Typography sx={{ fontWeight: 700 }}>Indian.com</Typography>
+            <AirlineMark code={leg.operator} size={28} />
+            <Box>
+              <Typography sx={{ fontWeight: 700, lineHeight: 1.1 }}>{AIRLINE[leg.operator].name}</Typography>
+              {leg.partner && <Typography variant="caption" sx={{ opacity: 0.8 }}>Codeshare · booked with Indian.com</Typography>}
+            </Box>
           </Box>
           <Typography variant="overline" sx={{ color: "#D4A72C" }}>{cancelled ? "Cancelled" : `${CABIN_LABEL[booking.cabin]} · boarding pass`}</Typography>
         </Box>
@@ -66,11 +69,12 @@ export function BoardingPass({ booking, passenger, leg, seat, byCode }: { bookin
         </Box>
         <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(96px, 1fr))", gap: 2 }}>
           <Field label="Passenger" value={`${passenger.firstName} ${passenger.lastName}`} />
-          <Field label="Flight" value={leg.flightNo.replace("IN", "IN ")} />
+          <Field label="Flight" value={leg.flightNo} />
           <Field label="Date" value={formatDate(leg.depUtc, from.tz)} />
           <Field label="Boarding" value={formatTime(boardingUtc(leg), from.tz)} />
           <Field label="Departs" value={formatTime(leg.depUtc, from.tz)} />
           <Field label="Seat" value={seat ?? "At check-in"} />
+          <Field label="Aircraft" value={leg.registration ?? leg.aircraft} />
         </Box>
       </Box>
       <Box

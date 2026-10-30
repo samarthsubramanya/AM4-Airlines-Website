@@ -1,7 +1,7 @@
 "use client";
 import useSWR from "swr";
 import { fetcher } from "./api";
-import type { Aircraft, Airport, CabinInfo, NetworkLink, Tier } from "./types";
+import type { Aircraft, Airline, AirlineCode, Airport, CabinInfo, NetworkLink, Tier } from "./types";
 
 const STATIC = { revalidateOnFocus: false, revalidateIfStale: false, dedupingInterval: 3600_000 };
 
@@ -12,7 +12,7 @@ export function useAirports() {
 }
 
 export const useNetwork = () =>
-  useSWR<{ airports: Airport[]; links: NetworkLink[] }>("/network", fetcher, STATIC);
+  useSWR<{ airports: Airport[]; links: NetworkLink[]; airlines: Record<AirlineCode, Airline> }>("/network", fetcher, STATIC);
 
 export const useFleet = () =>
   useSWR<{ aircraft: Aircraft[]; cabins: Record<string, CabinInfo> }>("/fleet", fetcher, STATIC);

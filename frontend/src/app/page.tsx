@@ -10,6 +10,8 @@ import { LinkButton } from "@/components/LinkButton";
 import Typography from "@mui/material/Typography";
 import { HeroBackdrop } from "@/components/Hero";
 import { HubCards } from "@/components/HubCards";
+import { IndusLogo } from "@/components/Airline";
+import { Logo } from "@/components/Logo";
 import { SearchForm } from "@/components/SearchForm";
 
 const FEATURES = [
@@ -28,7 +30,7 @@ export default function Home() {
             Spread your wings. Fly the peacock.
           </Typography>
           <Typography variant="h6" component="p" sx={{ fontWeight: 400, opacity: 0.85, maxWidth: 620, mt: 2, mb: 5 }}>
-            70 destinations on six continents, connected through Bengaluru and eight global hubs.
+            More than 120 airports on six continents, flown by Indian.com and our global sister airline Indus Air.
           </Typography>
           <Box sx={{ color: "text.primary" }}>
             <SearchForm />
@@ -40,13 +42,36 @@ export default function Home() {
         <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", mb: 3, gap: 2, flexWrap: "wrap" }}>
           <Box>
             <Typography variant="overline" color="primary">Our hubs</Typography>
-            <Typography variant="h4" component="h2">Nonstop from Bengaluru</Typography>
+            <Typography variant="h4" component="h2">Fly from Bengaluru to our hubs</Typography>
           </Box>
           <LinkButton href="/network" variant="outlined">See the route map</LinkButton>
         </Box>
         <HubCards />
 
         <Grid container spacing={2} sx={{ mt: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card sx={{ height: "100%", borderTop: 4, borderTopColor: "#0A4D68" }}>
+              <CardContent sx={{ p: 3 }}>
+                <Logo size={36} />
+                <Typography color="text.secondary" sx={{ mt: 2 }}>
+                  Every flight to, from and within India, from our home in Bengaluru and our Delhi hub.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card sx={{ height: "100%", borderTop: 4, borderTopColor: "#2E2A6B" }}>
+              <CardContent sx={{ p: 3 }}>
+                <IndusLogo size={36} />
+                <Typography color="text.secondary" sx={{ mt: 2 }}>
+                  Our global brand. Indus Air links Sydney, Singapore, Hong Kong, Rome, San Francisco and beyond without touching India, with the same peacock service.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={2} sx={{ mt: 2 }}>
           {FEATURES.map((f) => (
             <Grid key={f.title} size={{ xs: 12, md: 4 }}>
               <Card sx={{ height: "100%" }}>

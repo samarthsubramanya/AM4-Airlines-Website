@@ -44,14 +44,6 @@ export function dayOffset(depUtc: number, depTz: string, arrUtc: number, arrTz: 
 
 export const CABIN_LABEL = { economy: "Economy", business: "Business", first: "First" } as const;
 
-export const AIRCRAFT_NAME: Record<string, string> = {
-  A388: "Airbus A380-800",
-  B77W: "Boeing 777-300ER",
-  A359U: "Airbus A350-900ULR",
-  B789: "Boeing 787-9",
-  A21N: "Airbus A321neo",
-};
-
 export const todayISO = () => {
   const d = new Date();
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);

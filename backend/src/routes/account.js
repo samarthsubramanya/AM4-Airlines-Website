@@ -3,10 +3,10 @@ import { z } from 'zod';
 import { signDemoToken, requireUser } from '../middleware/auth.js';
 import { tierFor } from '../lib/loyalty.js';
 
-export function accountRoutes(store, { secret, demoAuth }) {
+export function accountRoutes(store, { secret, demoAuth, adminLogin }) {
   const r = Router();
 
-  r.get('/auth/config', (_req, res) => res.json({ demoAuth }));
+  r.get('/auth/config', (_req, res) => res.json({ demoAuth, adminLogin }));
 
   r.post('/auth/demo-login', (req, res) => {
     if (!demoAuth) return res.status(404).json({ error: 'Demo login is disabled' });

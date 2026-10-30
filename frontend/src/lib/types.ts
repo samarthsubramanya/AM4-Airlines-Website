@@ -2,6 +2,7 @@ export type Cabin = "economy" | "business" | "first";
 
 export interface Airport {
   code: string;
+  icao: string;
   name: string;
   city: string;
   country: string;
@@ -11,9 +12,25 @@ export interface Airport {
   hub?: "primary" | "secondary";
 }
 
+export type AirlineCode = "IN" | "IS" | "QS" | "GR" | "RB";
+
+export interface Airline {
+  code: AirlineCode;
+  name: string;
+  kind: "own" | "partner";
+  color: string;
+  accent: string;
+  tagline: string;
+}
+
 export interface Leg {
   key: string;
   flightNo: string;
+  operator: AirlineCode;
+  partner: boolean;
+  routeId: string | null;
+  aircraftName: string;
+  registration: string | null;
   date: string;
   from: string;
   to: string;
@@ -47,6 +64,8 @@ export interface Itinerary {
   arrUtc: number;
   durationMin: number;
   km: number;
+  operators: AirlineCode[];
+  codeshare: boolean;
   cabins: Partial<Record<Cabin, CabinOffer>>;
 }
 
@@ -67,6 +86,7 @@ export interface SeatLayout {
 
 export interface SeatMapData {
   flight: Leg;
+  aircraft: { code: string; name: string; category: string };
   cabin: Cabin;
   layout: SeatLayout;
   occupied: string[];
@@ -105,10 +125,14 @@ export interface Aircraft {
   code: string;
   name: string;
   nickname: string;
+  category: string;
   count: number;
+  routes: number;
   rangeKm: number;
   cruiseKmh: number;
   description: string;
+  cargo: boolean;
+  cargoTonnes?: number;
   seats: Partial<Record<Cabin, number>>;
 }
 
@@ -127,11 +151,28 @@ export interface Tier {
 }
 
 export interface NetworkLink {
+  routeId: string;
   from: string;
   to: string;
   km: number;
   aircraft: string;
+  registration: string;
+  flightNo: string;
+  operator: AirlineCode;
+  cargo: boolean;
   weeklyFlights: number;
+  blockMin: number;
+}
+
+export interface AdminRoute {
+  id: string;
+  from: string;
+  to: string;
+  flightNumber: string;
+  aircraft: string;
+  registration: string;
+  computed: NetworkLink | null;
+  problem: string | null;
 }
 
 export interface User {
@@ -139,6 +180,7 @@ export interface User {
   email: string;
   name: string;
   provider: "demo" | "catalyst";
+  admin?: boolean;
 }
 
 export interface Account {

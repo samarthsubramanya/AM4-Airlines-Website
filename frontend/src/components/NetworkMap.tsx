@@ -7,6 +7,7 @@ import Link from "next/link";
 import { CircleMarker, MapContainer, Polyline, Popup, TileLayer } from "react-leaflet";
 import { addDaysISO, todayISO } from "@/lib/format";
 import type { Airport, NetworkLink } from "@/lib/types";
+import { AIRLINE } from "./Airline";
 import { searchUrl } from "./SearchForm";
 
 const toRad = (d: number) => (d * Math.PI) / 180;
@@ -73,12 +74,12 @@ export default function NetworkMap({ airports, links, focus, onFocus }: Props) {
         const b = byCode[l.to];
         if (!a || !b) return [];
         const pts = arc(a, b);
-        const hubLink = !!(a.hub && b.hub);
-        const style = { color: hubLink ? "#D4A72C" : dark ? "#6FD3E4" : "#088395", weight: hubLink ? 2 : 1.2, opacity: focus ? 0.9 : 0.55 };
+        const color = l.cargo ? "#D4A72C" : l.operator === "IN" ? (dark ? "#6FD3E4" : "#088395") : dark ? "#A9A6F5" : "#4B47B5";
+        const style = { color, weight: focus ? 2 : 1.3, opacity: focus ? 0.95 : 0.6, dashArray: l.cargo ? "4 5" : undefined };
         // If the arc ends on a different world copy than b's marker, draw a shifted copy too.
         const shift = displayLon(b.lon) - pts.at(-1)![1];
-        const lines = [<Polyline key={`${l.from}-${l.to}`} positions={pts} pathOptions={style} />];
-        if (Math.abs(shift) > 1) lines.push(<Polyline key={`${l.from}-${l.to}-copy`} positions={pts.map(([la, lo]) => [la, lo + shift])} pathOptions={style} />);
+        const lines = [<Polyline key={l.routeId} positions={pts} pathOptions={style} />];
+        if (Math.abs(shift) > 1) lines.push(<Polyline key={`${l.routeId}-copy`} positions={pts.map(([la, lo]) => [la, lo + shift])} pathOptions={style} />);
         return lines;
       })}
       {airports.map((a) => {
@@ -99,11 +100,19 @@ export default function NetworkMap({ airports, links, focus, onFocus }: Props) {
                 <Typography variant="caption" component="div" sx={{ mb: 1 }}>
                   {a.hub === "primary" ? "Primary hub · " : a.hub ? "Hub · " : ""}{routeCount(a.code)} nonstop route{routeCount(a.code) === 1 ? "" : "s"}
                 </Typography>
-                {a.code !== "BLR" && (
-                  <Link href={searchUrl({ from: "BLR", to: a.code, date, returnDate: addDaysISO(date, 7), adults: 1, children: 0, cabin: "economy" })}>
-                    Flights from Bengaluru →
-                  </Link>
-                )}
+                {links
+                  .filter((l) => (l.from === a.code || l.to === a.code) && !l.cargo)
+                  .slice(0, 6)
+                  .map((l) => {
+                    const other = l.from === a.code ? l.to : l.from;
+                    return (
+                      <Typography key={l.routeId} variant="caption" component="div">
+                        <Link href={searchUrl({ from: a.code, to: other, date, adults: 1, children: 0, cabin: "economy" })} style={{ color: AIRLINE[l.operator].color }}>
+                          {l.flightNo} to {byCode[other]?.city ?? other} →
+                        </Link>
+                      </Typography>
+                    );
+                  })}
               </Box>
             </Popup>
           </CircleMarker>

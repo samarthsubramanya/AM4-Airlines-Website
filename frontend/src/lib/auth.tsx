@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { mutate } from "swr";
 import { api, getToken, setToken } from "./api";
 import type { User } from "./types";
 
@@ -18,7 +19,7 @@ function decode(token: string): (User & { exp: number }) | null {
   try {
     const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
     if (payload.exp * 1000 < Date.now()) return null;
-    return { id: payload.sub, email: payload.email, name: payload.name, provider: payload.provider, exp: payload.exp };
+    return { id: payload.sub, email: payload.email, name: payload.name, provider: payload.provider, admin: payload.role === "admin", exp: payload.exp };
   } catch {
     return null;
   }
@@ -28,6 +29,7 @@ interface AuthState {
   user: User | null;
   ready: boolean;
   demoLogin: (name: string, email: string) => Promise<void>;
+  adminLogin: (password: string) => Promise<void>;
   completeCatalystLogin: () => Promise<void>;
   signOut: () => void;
 }
@@ -48,14 +50,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setReady(true);
   }, []);
 
+  // Responses are per-user (account, admin data), so drop cached ones when the user changes.
+  const clearCache = () => mutate(() => true, undefined, { revalidate: false });
+
   const accept = useCallback((token: string) => {
     setToken(token);
+    clearCache();
     setUser(decode(token));
   }, []);
 
   const demoLogin = useCallback(
     async (name: string, email: string) => {
       const { token } = await api<{ token: string }>("/auth/demo-login", { method: "POST", json: { name, email } });
+      accept(token);
+    },
+    [accept],
+  );
+
+  const adminLogin = useCallback(
+    async (password: string) => {
+      const { token } = await api<{ token: string }>("/admin/login", { method: "POST", json: { password } });
       accept(token);
     },
     [accept],
@@ -71,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(() => {
     const wasCatalyst = user?.provider === "catalyst";
     setToken(null);
+    clearCache();
     setUser(null);
     if (wasCatalyst) {
       const w = window as unknown as { catalyst?: { auth?: { signOut: (url: string) => void } } };
@@ -79,8 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const value = useMemo(
-    () => ({ user, ready, demoLogin, completeCatalystLogin, signOut }),
-    [user, ready, demoLogin, completeCatalystLogin, signOut],
+    () => ({ user, ready, demoLogin, adminLogin, completeCatalystLogin, signOut }),
+    [user, ready, demoLogin, adminLogin, completeCatalystLogin, signOut],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

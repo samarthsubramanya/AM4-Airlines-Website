@@ -1,12 +1,48 @@
+import { seedRoutes } from '../data/seed.js';
 import { SeatTakenError } from './errors.js';
 
 // In-memory store, used when MONGODB_URI isn't set (local dev, tests, demos).
-export function createMemoryStore() {
+export function createMemoryStore({ routes: initialRoutes = seedRoutes() } = {}) {
   const bookings = new Map();
   const seats = new Map(); // "<flightKey>:<seat>" -> { pnr, cabin }
+  let routes = initialRoutes.map((r) => ({ ...r }));
+  const airports = new Map(); // custom airports added by admins, by ICAO
 
   return {
     kind: 'memory',
+
+    async listRoutes() {
+      return routes.map((r) => ({ ...r }));
+    },
+    async createRoute(route) {
+      routes.push({ ...route });
+      return { ...route };
+    },
+    async updateRoute(id, patch) {
+      const r = routes.find((x) => x.id === id);
+      if (!r) return null;
+      Object.assign(r, patch);
+      return { ...r };
+    },
+    async deleteRoute(id) {
+      const before = routes.length;
+      routes = routes.filter((r) => r.id !== id);
+      return routes.length < before;
+    },
+    async replaceRoutes(next) {
+      routes = next.map((r) => ({ ...r }));
+    },
+
+    async listAirports() {
+      return [...airports.values()].map((a) => ({ ...a }));
+    },
+    async upsertAirport(airport) {
+      airports.set(airport.icao, { ...airport });
+      return { ...airport };
+    },
+    async deleteAirport(icao) {
+      return airports.delete(icao);
+    },
 
     async createBooking(booking, seatClaims) {
       const taken = seatClaims.filter((c) => seats.has(`${c.key}:${c.seat}`)).map((c) => `${c.seat} on ${c.key}`);

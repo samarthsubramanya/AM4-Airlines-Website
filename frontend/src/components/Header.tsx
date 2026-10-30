@@ -87,6 +87,7 @@ export function Header() {
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={() => { setMenuEl(null); router.push("/miles"); }}>My trips & miles</MenuItem>
+                {user.admin && <MenuItem onClick={() => { setMenuEl(null); router.push("/admin"); }}>Network admin</MenuItem>}
                 <MenuItem onClick={() => { setMenuEl(null); signOut(); }}>Sign out</MenuItem>
               </Menu>
             </>

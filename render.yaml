@@ -19,3 +19,7 @@ services:
         sync: false
       - key: DEMO_AUTH
         value: "true"
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false

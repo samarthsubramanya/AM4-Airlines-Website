@@ -67,7 +67,7 @@ const publicBooking = ({ userId, ...b }) => b;
 const lastNameMatches = (booking, lastName) =>
   booking.passengers.some((p) => p.lastName.toLowerCase() === String(lastName || '').trim().toLowerCase());
 
-export function bookingRoutes(store) {
+export function bookingRoutes(store, network) {
   const r = Router();
   const createLimiter = rateLimit({ windowMs: 15 * 60000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false });
   const lookupLimiter = rateLimit({ windowMs: 15 * 60000, limit: 60, standardHeaders: 'draft-7', legacyHeaders: false });
@@ -83,7 +83,8 @@ export function bookingRoutes(store) {
       // Demo decline card so the failure path can be shown.
       if (payment.cardNumber === '4000000000000002') return res.status(402).json({ error: 'Your card was declined' });
 
-      const resolved = journeys.map((j) => resolveItinerary(j.itineraryId));
+      const net = await network.get();
+      const resolved = journeys.map((j) => resolveItinerary(net, j.itineraryId));
       if (resolved.some((legs) => !legs)) return res.status(400).json({ error: 'That flight is no longer available' });
       if (resolved[0][0].depUtc < Date.now() + 60 * 60000) return res.status(400).json({ error: 'This flight has closed for booking' });
       if (resolved[1] && resolved[1][0].depUtc < resolved[0].at(-1).arrUtc + 2 * 3600000) {

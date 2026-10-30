@@ -35,3 +35,8 @@ Indian.com can use [Zoho Catalyst Embedded Authentication](https://docs.catalyst
 
 - Catalyst's docs show the init script served from the app's own domain (`/__catalyst/sdk/init.js`). Loading it from an external domain depends on the Authorized Domains setting. If your browser blocks the cross-site session cookie, host the Next.js export on Catalyst Web Client Hosting, or put both behind one custom domain.
 - I couldn't test this path end to end without a Catalyst project. Treat it as a starting point and check it against the Catalyst console once you have keys.
+
+## Admins
+
+Catalyst users whose email is listed in the API's `ADMIN_EMAILS` (comma separated) can open `/admin` without the admin password.
+Demo sign-ins never get admin rights this way, because anyone can type any email into the demo form.

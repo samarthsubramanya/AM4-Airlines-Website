@@ -11,8 +11,9 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
-import { AIRCRAFT_NAME, CABIN_LABEL, dayOffset, formatDate, formatDuration, formatMoney, formatTime } from "@/lib/format";
+import { CABIN_LABEL, dayOffset, formatDate, formatDuration, formatMoney, formatTime } from "@/lib/format";
 import type { Airport, Cabin, Itinerary, Leg } from "@/lib/types";
+import { AIRLINE, AirlineMark, OperatorChip } from "./Airline";
 
 function TimeBlock({ utc, airport, align = "left", plusDays = 0 }: { utc: number; airport?: Airport; align?: "left" | "right"; plusDays?: number }) {
   if (!airport) return null;
@@ -43,9 +44,13 @@ export function LegDetail({ leg, byCode }: { leg: Leg; byCode: Record<string, Ai
       </Box>
       <Box sx={{ flex: 1 }}>
         <Typography variant="body2"><strong>{formatTime(leg.depUtc, from.tz)}</strong> · {formatDate(leg.depUtc, from.tz)} · {from.city} ({from.code}) — {from.name}</Typography>
-        <Typography variant="caption" color="text.secondary" component="div" sx={{ my: 1 }}>
-          {leg.flightNo.replace("IN", "IN ")} · {AIRCRAFT_NAME[leg.aircraft]} · {formatDuration(leg.durationMin)} · {leg.km.toLocaleString("en-IN")} km
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, my: 1, flexWrap: "wrap" }}>
+          <AirlineMark code={leg.operator} size={18} />
+          <Typography variant="caption" color="text.secondary">
+            {leg.flightNo} · {AIRLINE[leg.operator].name}{leg.partner ? " (codeshare)" : ""} · {leg.aircraftName}
+            {leg.registration ? ` · ${leg.registration}` : ""} · {formatDuration(leg.durationMin)} · {leg.km.toLocaleString("en-IN")} km
+          </Typography>
+        </Box>
         <Typography variant="body2"><strong>{formatTime(leg.arrUtc, to.tz)}</strong> · {formatDate(leg.arrUtc, to.tz)} · {to.city} ({to.code}) — {to.name}</Typography>
       </Box>
     </Box>
@@ -91,8 +96,10 @@ export function ItineraryCard({ it, byCode, cabin, pax, onSelect, selected, only
         <Box sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
           <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}>
             <Chip size="small" color={it.stops ? "default" : "success"} label={it.stops ? `${it.stops} stop${it.stops > 1 ? "s" : ""}` : "Nonstop"} />
-            <Chip size="small" variant="outlined" label={it.legs.map((l) => l.flightNo.replace("IN", "IN ")).join(" + ")} />
+            <Chip size="small" variant="outlined" label={it.legs.map((l) => l.flightNo).join(" + ")} />
+            {it.operators.map((op) => <OperatorChip key={op} code={op} prefix={AIRLINE[op].partner ? "Codeshare · " : ""} />)}
             {it.legs.some((l) => l.aircraft === "A388") && <Chip size="small" color="secondary" variant="outlined" label="A380" />}
+            {it.legs.some((l) => ["A320V", "CL60", "C750"].includes(l.aircraft)) && <Chip size="small" color="secondary" label="Private jet" />}
           </Stack>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <TimeBlock utc={first.depUtc} airport={from} />

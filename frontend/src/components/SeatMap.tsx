@@ -11,7 +11,6 @@ import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/api";
-import { AIRCRAFT_NAME } from "@/lib/format";
 import type { Cabin, Leg, SeatMapData } from "@/lib/types";
 
 interface Props {
@@ -36,7 +35,7 @@ function Legend({ color, label, outlined }: { color: string; label: string; outl
 }
 
 export function SeatMap({ leg, cabin, travellers, value, onChange }: Props) {
-  const { data, error, isLoading } = useSWR<SeatMapData>(`/flights/${leg.flightNo}/${leg.date}/seats?cabin=${cabin}`, fetcher, { revalidateOnFocus: false });
+  const { data, error, isLoading } = useSWR<SeatMapData>(`/flights/${encodeURIComponent(leg.key)}/seats?cabin=${cabin}`, fetcher, { revalidateOnFocus: false });
   const [active, setActive] = useState(() => Math.max(0, value.findIndex((s) => !s)));
 
   if (error) return <Alert severity="error">{error.message}</Alert>;
@@ -82,7 +81,7 @@ export function SeatMap({ leg, cabin, travellers, value, onChange }: Props) {
       </Stack>
       <Paper variant="outlined" sx={{ overflow: "auto", maxHeight: 520, py: 3, px: { xs: 1, sm: 3 }, bgcolor: "background.default", borderRadius: "120px 120px 24px 24px" }}>
         <Typography variant="caption" color="text.secondary" component="div" sx={{ textAlign: "center", mb: 2 }}>
-          Front of aircraft · {AIRCRAFT_NAME[leg.aircraft]}
+          Front of aircraft · {data.aircraft.name}{leg.registration ? ` · ${leg.registration}` : ""}
         </Typography>
         <Box sx={{ width: "fit-content", mx: "auto" }}>
           <Box sx={{ display: "flex", gap: 1, mb: 1, pl: 4 }}>
