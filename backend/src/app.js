@@ -9,6 +9,20 @@ import { bookingRoutes } from './routes/bookings.js';
 import { catalogRoutes } from './routes/catalog.js';
 import { flightRoutes } from './routes/flights.js';
 
+/**
+ * Turn CORS_ORIGINS entries into matchers. Browsers send origins without a trailing slash
+ * or path, so those are stripped; "*" matches one host label, e.g. for Vercel previews:
+ * https://my-app-*.vercel.app
+ */
+export function originMatchers(list) {
+  return list.map((entry) => {
+    const clean = entry.trim().replace(/\/+$/, '').toLowerCase();
+    if (!clean.includes('*')) return clean;
+    const re = clean.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[a-z0-9-]+');
+    return new RegExp(`^${re}$`);
+  });
+}
+
 export function createApp(store, { secret, demoAuth = true, corsOrigins = [], adminPassword = '', adminEmails = [] }) {
   const app = express();
   const network = createNetworkProvider(store);
@@ -16,7 +30,7 @@ export function createApp(store, { secret, demoAuth = true, corsOrigins = [], ad
   app.use(helmet());
   app.use(
     cors({
-      origin: corsOrigins.length ? corsOrigins : true,
+      origin: corsOrigins.length ? originMatchers(corsOrigins) : true,
       allowedHeaders: ['Content-Type', 'Authorization'],
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
     }),

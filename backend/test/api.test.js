@@ -245,3 +245,26 @@ describe('admin', () => {
     assert.equal(res.body.imported, csv.trim().split('\n').length - 1);
   });
 });
+
+describe('CORS', () => {
+  test('ignores trailing slashes and supports * for preview hosts', async () => {
+    const app = createApp(createMemoryStore(), {
+      secret: 's',
+      corsOrigins: ['https://site.vercel.app/', 'https://site-*.vercel.app'],
+    });
+    const srv = app.listen(0);
+    await new Promise((r) => srv.once('listening', r));
+    const allowed = async (origin) => {
+      const res = await fetch(`http://127.0.0.1:${srv.address().port}/api/health`, { headers: { Origin: origin } });
+      return res.headers.get('access-control-allow-origin');
+    };
+    try {
+      assert.equal(await allowed('https://site.vercel.app'), 'https://site.vercel.app');
+      assert.equal(await allowed('https://site-git-main-me.vercel.app'), 'https://site-git-main-me.vercel.app');
+      assert.equal(await allowed('https://evil.com'), null);
+      assert.equal(await allowed('https://site-x.vercel.app.evil.com'), null);
+    } finally {
+      srv.close();
+    }
+  });
+});

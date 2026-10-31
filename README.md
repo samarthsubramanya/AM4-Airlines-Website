@@ -74,8 +74,8 @@ cd backend && npm test
 ## Deploy (all free tiers)
 
 1. **MongoDB Atlas:** create a free M0 cluster and a database user. Allow network access from anywhere (Render's IPs aren't fixed). Copy the connection string.
-2. **Render (API):** New → Blueprint → select this repo (it uses `render.yaml`). Set `MONGODB_URI`, `CORS_ORIGINS` (your frontend URL) and `ADMIN_PASSWORD`. `AUTH_JWT_SECRET` is generated for you.
-3. **Vercel (frontend):** import the repo with **Root Directory** set to `frontend`. Set `NEXT_PUBLIC_API_URL` to your Render URL (e.g. `https://indian-com-api.onrender.com`).
+2. **Render (API):** New → Blueprint → select this repo (it uses `render.yaml`). Set `MONGODB_URI`, `CORS_ORIGINS` and `ADMIN_PASSWORD`. `CORS_ORIGINS` is your frontend URL, e.g. `https://my-app.vercel.app`; add `https://my-app-*.vercel.app` to allow Vercel preview deployments too. `AUTH_JWT_SECRET` is generated for you.
+3. **Vercel (frontend):** import the repo with **Root Directory** set to `frontend`. Set `NEXT_PUBLIC_API_URL` to your Render URL (e.g. `https://indian-com-api.onrender.com`) for **both Production and Preview**. The value is baked in at build time, so redeploy after changing it.
    Netlify works too: base directory `frontend`, with the Next.js runtime.
 4. **Zoho Catalyst (optional sign-in):** see [`catalyst/README.md`](catalyst/README.md). Once deployed, set `NEXT_PUBLIC_CATALYST_APP_URL` on Vercel, and optionally `DEMO_AUTH=false` on Render.
 
