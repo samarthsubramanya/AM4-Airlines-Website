@@ -1,4 +1,16 @@
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/$/, "");
+/**
+ * Base URL of the Express API. NEXT_PUBLIC_ values are inlined when `next build` runs,
+ * so changing it on Vercel/Netlify only takes effect after a redeploy.
+ * Tolerates common paste mistakes: missing https://, trailing slash, trailing /api.
+ */
+function apiBase(raw: string | undefined) {
+  let url = (raw || "").trim();
+  if (!url) return "http://localhost:4000";
+  if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+  return url.replace(/\/+$/, "").replace(/\/api$/i, "");
+}
+
+export const API_URL = apiBase(process.env.NEXT_PUBLIC_API_URL);
 
 const TOKEN_KEY = "indiancom.token";
 
